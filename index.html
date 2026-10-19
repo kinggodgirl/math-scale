@@ -390,6 +390,102 @@
     @keyframes popBounce { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     @keyframes fadeIn { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
     @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+ /* ★ 스마트폰 및 태블릿 세로 화면 대응 (반응형 미디어 쿼리) */
+    @media (max-width: 960px) {
+      body {
+        height: auto; min-height: 100vh; overflow-y: auto;
+        padding: 0; align-items: flex-start;
+      }
+      .game-window {
+        height: auto; max-height: none; min-height: 100vh;
+        border-radius: 0; box-shadow: none;
+      }
+
+      /* 1. 상단 바: 줄바꿈 및 가로 스크롤 허용 */
+      .header-bar {
+        height: auto; flex-wrap: wrap; gap: 8px; padding: 10px 12px;
+      }
+      .brand { font-size: 1rem; }
+      .stage-nav {
+        order: 3; width: 100%; overflow-x: auto; padding-bottom: 4px;
+        justify-content: flex-start; flex-wrap: nowrap;
+      }
+      .stage-pill { flex-shrink: 0; font-size: 0.75rem; padding: 5px 10px; }
+
+      /* 2. 좌/우 2단 분할을 상/하 1단으로 변경 (우측 공책이 아래로 내려감) */
+      .main-workspace {
+        display: flex; flex-direction: column; overflow: visible;
+      }
+      .canvas-section {
+        padding: 12px 10px; min-height: 540px;
+      }
+
+      /* 3. 상단 HUD 세로 정렬 */
+      .canvas-hud {
+        flex-direction: column; align-items: center; gap: 8px;
+      }
+      .goal-guide-card {
+        max-width: 100%; width: 100%; padding: 8px 12px;
+      }
+      .goal-title { font-size: 0.82rem; }
+      .equation-hud {
+        font-size: 1.35rem; padding: 6px 18px; order: -1; /* 수식을 맨 위로 */
+      }
+      .moves-hud {
+        width: 100%; display: flex; justify-content: space-between;
+        align-items: center; padding: 6px 12px;
+      }
+
+      /* 4. 거대한 양팔저울을 폰 화면 폭에 맞게 비율 축소 (Scale Down) */
+      .scale-stage-center {
+        min-height: 220px; width: 100%; overflow: hidden;
+      }
+      .scale-area {
+        transform: scale(0.56); /* 폰 화면에 쏙 들어오도록 축소 */
+        transform-origin: center center;
+        margin: -40px 0;
+      }
+
+      /* 빈 저울 나눠 담기 모드 모바일 대응 */
+      .mini-scales-container {
+        flex-wrap: wrap; gap: 8px;
+      }
+      .mini-scale-card {
+        width: 47%; padding: 6px;
+      }
+      .mini-scale-viewport {
+        width: 150px; height: 110px;
+      }
+      .mini-scale-inner {
+        transform: scale(0.28);
+      }
+      .split-control-bar {
+        flex-wrap: wrap; justify-content: center; width: 100%;
+      }
+
+      /* 5. 하단 컨트롤 독: 모바일 터치에 맞게 줄바꿈 */
+      .floating-dock {
+        width: 100%; padding: 10px; gap: 8px; border-radius: 16px;
+      }
+      .dock-section {
+        border-right: none; width: 100%; justify-content: center;
+        border-bottom: 1px solid #334155; padding-bottom: 6px;
+        flex-wrap: wrap;
+      }
+      .dock-section:last-child { border-bottom: none; padding-bottom: 0; }
+
+      /* 클리어 배너 모바일 크기 조정 */
+      .clear-floating-banner {
+        width: 94%; flex-wrap: wrap; justify-content: center;
+        text-align: center; padding: 10px 14px; top: 60px; gap: 10px;
+      }
+
+      /* 6. 우측 수학 공책은 화면 맨 아래에 깔끔하게 배치 */
+      .notebook-sidebar {
+        border-left: none; border-top: 2px solid #cbd5e1;
+        max-height: 260px;
+      }
+    }
   </style>
 </head>
 <body>
