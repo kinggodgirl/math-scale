@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>중1 수학: 양팔저울 방정식 마스터</title>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -10,174 +10,188 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
   <style>
-    * { box-sizing: border-box; user-select: none; }
-    body {
-      margin: 0; padding: 0;
+    * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0; padding: 0; width: 100%; height: 100%;
       font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      color: #1e293b; height: 100vh; overflow: hidden;
-      display: flex; justify-content: center; align-items: center; padding: 14px;
+      color: #1e293b; overflow: hidden;
+    }
+    #root {
+      width: 100%; height: 100%;
+      display: flex; justify-content: center; align-items: center; padding: 12px;
     }
 
     .game-window {
-      width: 100%; max-width: 1280px; height: 95vh; max-height: 840px;
-      background: #f8fafc; border-radius: 24px;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.45), 0 0 0 4px rgba(255,255,255,0.1);
-      display: flex; flex-direction: column; overflow: hidden;
+      width: 100%; max-width: 1280px; height: 100%; max-height: 860px;
+      background: #f8fafc; border-radius: 22px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.45), 0 0 0 3px rgba(255,255,255,0.1);
+      display: flex; flex-direction: column; overflow: hidden; position: relative;
     }
 
     /* 1. 상단 헤더 바 */
     .header-bar {
-      height: 56px; background: #0f172a; color: white;
+      background: #0f172a; color: white;
       display: flex; justify-content: space-between; align-items: center;
-      padding: 0 20px; flex-shrink: 0;
+      padding: 8px 16px; flex-shrink: 0; gap: 8px; flex-wrap: wrap;
     }
-    .brand { font-size: 1.1rem; font-weight: 900; display: flex; align-items: center; gap: 8px; }
+    .brand { font-size: 1.05rem; font-weight: 900; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
     
-    .stage-nav { display: flex; gap: 5px; }
-    .stage-pill {
-      padding: 6px 12px; border-radius: 18px; border: 1px solid #334155;
-      background: #1e293b; color: #94a3b8; font-weight: 800; font-size: 0.8rem;
-      cursor: pointer; transition: 0.2s;
+    .stage-nav {
+      display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none;
+      max-width: 100%; padding: 2px 0;
     }
-    .stage-pill:hover { color: white; border-color: #64748b; }
+    .stage-nav::-webkit-scrollbar { display: none; }
+    .stage-pill {
+      padding: 6px 11px; border-radius: 16px; border: 1px solid #334155;
+      background: #1e293b; color: #94a3b8; font-weight: 800; font-size: 0.78rem;
+      cursor: pointer; transition: 0.2s; white-space: nowrap; flex-shrink: 0;
+    }
     .stage-pill.tutorial-pill { border-color: #f59e0b; color: #fcd34d; }
     .stage-pill.active {
       background: #3b82f6; color: white; border-color: #60a5fa;
-      box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
     }
     .stage-pill.tutorial-pill.active {
       background: #f59e0b; color: #0f172a; border-color: #fde047;
-      box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
     }
 
-    .header-stats { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 800; }
+    .header-stats { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; font-weight: 800; }
     .stat-chip {
-      background: #1e293b; padding: 5px 12px; border-radius: 14px;
-      border: 1px solid #334155; display: flex; align-items: center; gap: 5px;
+      background: #1e293b; padding: 5px 10px; border-radius: 12px;
+      border: 1px solid #334155; display: flex; align-items: center; gap: 4px; white-space: nowrap;
     }
     .icon-btn {
       background: #1e293b; border: 1px solid #334155; color: white;
-      width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 0.9rem;
-      display: flex; align-items: center; justify-content: center;
+      height: 30px; padding: 0 10px; border-radius: 12px; cursor: pointer; font-size: 0.78rem;
+      font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 4px;
     }
+    .mobile-only-btn { display: none; }
 
     /* 2. 메인 바디 */
     .main-workspace {
-      flex: 1; display: grid; grid-template-columns: 1fr 310px;
-      overflow: hidden; position: relative;
+      flex: 1; display: grid; grid-template-columns: 1fr 300px;
+      overflow: hidden; position: relative; min-height: 0;
     }
 
     .canvas-section {
       display: flex; flex-direction: column; justify-content: space-between;
-      align-items: center; padding: 14px 22px; position: relative;
+      align-items: center; padding: 12px 18px; position: relative;
       background: radial-gradient(circle at 50% 45%, #ffffff 0%, #e2e8f0 100%);
-      overflow: hidden;
+      overflow: hidden; min-height: 0;
     }
 
     /* 상단 목표 가이드 & 수식 전광판 HUD */
     .canvas-hud {
       width: 100%; display: flex; justify-content: space-between; align-items: flex-start;
-      z-index: 10; gap: 12px;
+      z-index: 10; gap: 10px; flex-shrink: 0;
     }
     .goal-guide-card {
-      background: white; padding: 10px 16px; border-radius: 16px;
-      border: 2px solid #3b82f6; max-width: 380px;
-      box-shadow: 0 6px 15px rgba(59, 130, 246, 0.12);
+      background: white; padding: 9px 14px; border-radius: 14px;
+      border: 2px solid #3b82f6; flex: 1; max-width: 390px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
     }
     .goal-guide-card.tutorial-card { border-color: #f59e0b; background: #fffbeb; }
     .goal-guide-card.split-card { border-color: #8b5cf6; background: #f5f3ff; }
     .goal-badge {
-      display: inline-block; font-size: 0.72rem; font-weight: 900;
-      padding: 2px 8px; border-radius: 8px; margin-bottom: 4px;
+      display: inline-block; font-size: 0.7rem; font-weight: 900;
+      padding: 2px 7px; border-radius: 6px; margin-bottom: 3px;
       background: #dbeafe; color: #1d4ed8;
     }
     .tutorial-card .goal-badge { background: #fef3c7; color: #b45309; }
     .split-card .goal-badge { background: #ede9fe; color: #6d28d9; }
-    .goal-title { font-size: 0.88rem; font-weight: 900; color: #0f172a; line-height: 1.35; }
-    .goal-sub { font-size: 0.76rem; color: #475569; margin-top: 4px; font-weight: 600; }
+    .goal-title { font-size: 0.84rem; font-weight: 900; color: #0f172a; line-height: 1.32; }
+    .goal-sub { font-size: 0.74rem; color: #475569; margin-top: 3px; font-weight: 600; }
 
+    .hud-right-group {
+      display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+    }
     .equation-hud {
-      background: white; padding: 8px 26px; border-radius: 18px;
-      border: 3px solid #cbd5e1; font-size: 1.75rem; font-weight: 900;
-      display: flex; align-items: center; gap: 14px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.07);
+      background: white; padding: 6px 22px; border-radius: 16px;
+      border: 3px solid #cbd5e1; font-size: 1.65rem; font-weight: 900;
+      display: flex; align-items: center; gap: 12px; white-space: nowrap;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.06);
     }
     .sign-badge {
-      width: 38px; height: 38px; border-radius: 10px; color: white; font-size: 1.4rem;
+      width: 34px; height: 34px; border-radius: 9px; color: white; font-size: 1.25rem;
       display: flex; align-items: center; justify-content: center;
     }
     .sign-badge.equal { background: #16a34a; }
     .sign-badge.unequal { background: #dc2626; }
 
     .moves-hud {
-      background: #fffbeb; border: 2px solid #fde68a; border-radius: 14px;
-      padding: 8px 14px; text-align: right; min-width: 155px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      background: #fffbeb; border: 2px solid #fde68a; border-radius: 12px;
+      padding: 6px 12px; text-align: right; white-space: nowrap;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.04);
     }
-    .moves-hud .count { font-size: 0.95rem; font-weight: 900; color: #d97706; }
-    .moves-hud .target { font-size: 0.75rem; color: #92400e; font-weight: 700; }
+    .moves-hud .count { font-size: 0.88rem; font-weight: 900; color: #d97706; }
+    .moves-hud .target { font-size: 0.7rem; color: #92400e; font-weight: 700; }
 
-    /* 중앙 양팔저울 무대 */
+    /* ★ 중앙 양팔저울 무대 (JS 동적 스케일링 래퍼) */
     .scale-stage-center {
       flex: 1; width: 100%; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; position: relative;
+      align-items: center; justify-content: center; position: relative; min-height: 0;
+    }
+    /* 실제 스케일에 맞춰 크기가 정확히 줄어드는 컨테이너 */
+    .scale-sizer {
+      position: relative; display: flex; justify-content: center; align-items: center;
     }
     .scale-area {
-      position: relative; width: 620px; height: 300px;
+      position: absolute; width: 580px; height: 290px;
       display: flex; justify-content: center;
-      transform: scale(1.08); transform-origin: center center;
+      transform-origin: center center;
     }
     .scale-beam {
-      width: 440px; height: 16px;
+      width: 420px; height: 16px;
       background: linear-gradient(180deg, #fcd34d 0%, #d97706 100%);
       border: 2px solid #92400e; border-radius: 10px;
-      position: relative; top: 95px; z-index: 3;
+      position: relative; top: 92px; z-index: 3;
       box-shadow: 0 6px 14px rgba(0,0,0,0.18);
       transition: transform 0.7s cubic-bezier(0.34, 1.55, 0.64, 1);
     }
     .scale-pointer {
-      width: 8px; height: 42px; background: linear-gradient(180deg, #ef4444, #991b1b);
-      position: absolute; left: 50%; top: -34px; transform: translateX(-50%);
+      width: 8px; height: 40px; background: linear-gradient(180deg, #ef4444, #991b1b);
+      position: absolute; left: 50%; top: -32px; transform: translateX(-50%);
       border-radius: 4px 4px 0 0; border: 1px solid #7f1d1d;
     }
     .scale-center-cap {
-      width: 32px; height: 32px; border-radius: 50%;
+      width: 30px; height: 30px; border-radius: 50%;
       background: radial-gradient(circle at 35% 35%, #fef08a, #b45309);
-      border: 2px solid #78350f; position: absolute; left: 50%; top: -10px;
+      border: 2px solid #78350f; position: absolute; left: 50%; top: -9px;
       transform: translateX(-50%);
     }
     .scale-stand {
-      width: 30px; height: 190px;
+      width: 28px; height: 185px;
       background: linear-gradient(90deg, #475569 0%, #94a3b8 45%, #1e293b 100%);
-      position: absolute; top: 95px; z-index: 2; border-radius: 8px 8px 0 0;
+      position: absolute; top: 92px; z-index: 2; border-radius: 8px 8px 0 0;
     }
     .scale-base {
-      width: 210px; height: 24px;
+      width: 200px; height: 22px;
       background: linear-gradient(180deg, #475569 0%, #0f172a 100%);
-      position: absolute; top: 275px; z-index: 2; border-radius: 14px 14px 4px 4px;
+      position: absolute; top: 268px; z-index: 2; border-radius: 14px 14px 4px 4px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.25);
     }
 
     .plate-wrapper {
-      position: absolute; bottom: 14px; width: 190px;
+      position: absolute; bottom: 14px; width: 180px;
       display: flex; flex-direction: column; align-items: center;
       transition: transform 0.7s cubic-bezier(0.34, 1.55, 0.64, 1);
     }
-    .plate-wrapper.left { left: -95px; }
-    .plate-wrapper.right { right: -95px; }
+    .plate-wrapper.left { left: -90px; }
+    .plate-wrapper.right { right: -90px; }
     
     .plate {
-      width: 180px; height: 18px;
+      width: 170px; height: 16px;
       background: linear-gradient(180deg, #f1f5f9 0%, #64748b 100%);
-      border-radius: 4px 4px 28px 28px; border-top: 3px solid #ffffff;
+      border-radius: 4px 4px 26px 26px; border-top: 3px solid #ffffff;
       box-shadow: 0 8px 16px rgba(0,0,0,0.18);
     }
-    .plate-pillar { width: 8px; height: 16px; background: #92400e; }
+    .plate-pillar { width: 8px; height: 14px; background: #92400e; }
 
     .plate-role-tag {
-      position: absolute; bottom: -26px; font-size: 0.72rem; font-weight: 800;
-      padding: 3px 10px; border-radius: 10px; white-space: nowrap;
+      position: absolute; bottom: -25px; font-size: 0.72rem; font-weight: 800;
+      padding: 3px 9px; border-radius: 10px; white-space: nowrap;
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     }
     .tag-x-goal { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
@@ -185,7 +199,7 @@
 
     .items-box {
       display: flex; flex-wrap: wrap-reverse; justify-content: center;
-      align-content: flex-start; gap: 6px; width: 180px; min-height: 55px; padding-bottom: 4px;
+      align-content: flex-start; gap: 5px; width: 170px; min-height: 50px; padding-bottom: 4px;
     }
 
     /* 아이템 그래픽 */
@@ -195,53 +209,53 @@
       animation: itemDrop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
       transition: transform 0.15s;
     }
-    .item:hover { transform: scale(1.2) translateY(-4px); z-index: 10; }
+    .item:hover { transform: scale(1.18) translateY(-3px); z-index: 10; }
     .box-x {
-      width: 40px; height: 40px;
+      width: 38px; height: 38px;
       background: linear-gradient(135deg, #fde047 0%, #f59e0b 100%);
-      color: #78350f; border: 2px solid #b45309; border-radius: 10px; font-size: 1.25rem;
+      color: #78350f; border: 2px solid #b45309; border-radius: 9px; font-size: 1.2rem;
       box-shadow: inset 0 2px 3px rgba(255,255,255,0.8), 0 4px 6px rgba(0,0,0,0.15);
     }
     .box-gift {
-      width: 42px; height: 42px;
+      width: 40px; height: 40px;
       background: linear-gradient(135deg, #c084fc 0%, #7e22ce 100%);
-      color: white; border: 2px solid #581c87; border-radius: 10px; font-size: 1.3rem;
+      color: white; border: 2px solid #581c87; border-radius: 9px; font-size: 1.25rem;
       box-shadow: inset 0 2px 3px rgba(255,255,255,0.6), 0 4px 8px rgba(126, 34, 206, 0.3);
     }
     .weight-pos.distractor, .balloon-neg.distractor {
-      outline: 2px dashed rgba(239, 68, 68, 0.6); outline-offset: 2px;
+      outline: 2px dashed rgba(239, 68, 68, 0.65); outline-offset: 2px;
     }
     .box-x.opened {
       background: linear-gradient(135deg, #dcfce7 0%, #86efac 100%);
-      border: 2px dashed #16a34a; color: #15803d; width: auto; padding: 4px 10px; font-size: 1.05rem;
+      border: 2px dashed #16a34a; color: #15803d; width: auto; padding: 4px 10px; font-size: 1rem;
     }
     .box-neg-x {
-      width: 40px; height: 44px;
+      width: 38px; height: 42px;
       background: radial-gradient(circle at 30% 30%, #fda4af, #e11d48);
       color: white; border: 2px solid #9f1239; border-radius: 50% 50% 42% 42%;
-      margin-bottom: 12px; font-size: 1rem; animation: floatBalloon 2.2s ease-in-out infinite;
+      margin-bottom: 10px; font-size: 0.95rem; animation: floatBalloon 2.2s ease-in-out infinite;
     }
     .weight-pos {
-      width: 32px; height: 30px;
+      width: 30px; height: 28px;
       background: linear-gradient(180deg, #60a5fa 0%, #1d4ed8 100%);
       border: 2px solid #1e3a8a; border-radius: 7px 7px 4px 4px;
-      color: white; font-size: 0.85rem; margin-top: 6px;
+      color: white; font-size: 0.82rem; margin-top: 6px;
       box-shadow: inset 0 2px 2px rgba(255,255,255,0.5), 0 4px 6px rgba(0,0,0,0.2);
     }
     .weight-pos::before {
-      content: ''; position: absolute; top: -7px; width: 12px; height: 6px;
-      border: 2.5px solid #1e3a8a; border-bottom: none; border-radius: 8px 8px 0 0;
+      content: ''; position: absolute; top: -6px; width: 11px; height: 5px;
+      border: 2px solid #1e3a8a; border-bottom: none; border-radius: 8px 8px 0 0;
     }
     .balloon-neg {
-      width: 32px; height: 38px;
+      width: 30px; height: 36px;
       background: radial-gradient(circle at 30% 30%, #ff8787, #dc2626 80%);
       border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-      color: white; font-size: 0.85rem; margin-bottom: 14px;
+      color: white; font-size: 0.82rem; margin-bottom: 12px;
       box-shadow: 0 6px 12px rgba(220, 38, 38, 0.25);
       animation: floatBalloon 2s ease-in-out infinite;
     }
     .balloon-neg::after {
-      content: ''; position: absolute; bottom: -12px; width: 1.5px; height: 12px; background: #94a3b8;
+      content: ''; position: absolute; bottom: -10px; width: 1.5px; height: 10px; background: #94a3b8;
     }
 
     .poof-effect {
@@ -254,14 +268,14 @@
     /* 빈 저울 추가 & 수동 나눠 담기 워크스페이스 */
     .multi-scales-workspace {
       display: flex; flex-direction: column; align-items: center; width: 100%;
-      animation: fadeIn 0.3s ease;
+      animation: fadeIn 0.3s ease; max-height: 100%; overflow-y: auto; padding: 4px;
     }
     .mini-scales-container {
-      display: flex; justify-content: center; align-items: center; gap: 12px; width: 100%;
+      display: flex; justify-content: center; align-items: center; gap: 10px; width: 100%; flex-wrap: wrap;
     }
     .mini-scale-card {
-      background: rgba(255,255,255,0.92); border: 2px dashed #cbd5e1; border-radius: 18px;
-      padding: 10px 12px; display: flex; flex-direction: column; align-items: center;
+      background: rgba(255,255,255,0.95); border: 2px dashed #cbd5e1; border-radius: 16px;
+      padding: 8px 10px; display: flex; flex-direction: column; align-items: center;
       transition: all 0.25s; position: relative;
     }
     .mini-scale-card.source-card { border: 2px solid #3b82f6; background: #eff6ff; }
@@ -270,50 +284,46 @@
       box-shadow: 0 8px 20px rgba(16, 185, 129, 0.18);
     }
     .mini-badge {
-      font-size: 0.72rem; font-weight: 900; padding: 3px 10px; border-radius: 10px;
-      background: #64748b; color: white;
+      font-size: 0.68rem; font-weight: 900; padding: 3px 8px; border-radius: 8px;
+      background: #64748b; color: white; text-align: center;
     }
     .source-card .mini-badge { background: #2563eb; }
     .equal-ready .mini-badge { background: #059669; }
 
-    .mini-scale-viewport { width: 245px; height: 155px; position: relative; display: flex; justify-content: center; }
-    .mini-scale-inner { transform: scale(0.41); transform-origin: top center; position: absolute; top: 0px; }
-
     .split-control-bar {
-      display: flex; gap: 10px; margin-top: 10px; align-items: center;
-      background: white; padding: 8px 16px; border-radius: 16px;
+      display: flex; gap: 8px; margin-top: 8px; align-items: center; flex-wrap: wrap; justify-content: center;
+      background: white; padding: 7px 14px; border-radius: 14px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 1px solid #e2e8f0;
     }
 
     /* 3. 슬림 하단 플로팅 액션 독 */
     .floating-dock {
-      background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px);
-      padding: 9px 16px; border-radius: 20px; color: white;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.15);
-      display: flex; align-items: center; gap: 12px; z-index: 15;
-      flex-wrap: wrap; justify-content: center;
+      background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(12px);
+      padding: 8px 14px; border-radius: 18px; color: white;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.15);
+      display: flex; align-items: center; gap: 10px; z-index: 15;
+      flex-wrap: wrap; justify-content: center; flex-shrink: 0; width: 100%; max-width: 920px;
     }
     .dock-section {
-      display: flex; align-items: center; gap: 6px;
-      padding-right: 12px; border-right: 1px solid #334155;
-      border-radius: 8px; padding: 3px 10px 3px 4px; transition: 0.2s;
+      display: flex; align-items: center; gap: 5px;
+      padding: 3px 10px 3px 4px; border-right: 1px solid #334155;
+      border-radius: 8px; transition: 0.2s;
     }
     .dock-section:last-child { border-right: none; padding-right: 0; }
     .dock-section.needs-select {
       background: rgba(250, 204, 21, 0.12);
       outline: 1.5px dashed #facc15;
     }
-    .dock-label { font-size: 0.74rem; color: #94a3b8; font-weight: 700; margin-right: 2px; }
+    .dock-label { font-size: 0.72rem; color: #94a3b8; font-weight: 700; margin-right: 2px; white-space: nowrap; }
     .needs-select .dock-label { color: #fde047; }
 
     .dock-btn {
-      padding: 7px 12px; border: none; border-radius: 10px;
-      font-weight: 800; font-size: 0.82rem; cursor: pointer; transition: 0.12s;
+      padding: 7px 11px; border: none; border-radius: 9px;
+      font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: 0.12s;
       display: flex; align-items: center; gap: 4px; white-space: nowrap;
     }
     .dock-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .dock-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
-    .dock-btn.locked-action { opacity: 0.55; filter: grayscale(0.3); }
+    .dock-btn.locked-action { opacity: 0.5; filter: grayscale(0.3); }
     .dock-btn.pulse-highlight { outline: 3px solid #fde047; animation: pulse 1.2s infinite; }
 
     .d-pos { background: #3b82f6; color: white; }
@@ -325,25 +335,23 @@
     .d-util { background: #334155; color: #e2e8f0; }
 
     .num-chip {
-      width: 28px; height: 28px; border-radius: 7px; border: 1px solid #475569;
-      background: #1e293b; color: #cbd5e1; font-weight: 800; font-size: 0.8rem;
-      cursor: pointer; transition: 0.12s;
+      width: 27px; height: 27px; border-radius: 7px; border: 1px solid #475569;
+      background: #1e293b; color: #cbd5e1; font-weight: 800; font-size: 0.78rem;
+      cursor: pointer; transition: 0.12s; display: flex; align-items: center; justify-content: center;
     }
-    .num-chip:hover:not(:disabled) { border-color: #94a3b8; color: white; }
     .num-chip.active {
       background: #38bdf8; color: #0f172a; border-color: #bae6fd;
-      transform: scale(1.08); box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+      transform: scale(1.06); box-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
     }
 
     .sync-chip {
-      display: flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: 800;
-      background: #1e293b; padding: 5px 10px; border-radius: 8px; cursor: pointer;
-      border: 1px solid #475569; color: #cbd5e1; transition: 0.12s;
+      display: flex; align-items: center; gap: 4px; font-size: 0.78rem; font-weight: 800;
+      background: #1e293b; padding: 5px 9px; border-radius: 7px; cursor: pointer;
+      border: 1px solid #475569; color: #cbd5e1; transition: 0.12s; white-space: nowrap;
     }
-    .sync-chip:hover:not(:disabled) { border-color: #94a3b8; color: white; }
     .sync-chip.active {
       background: #0284c7; color: white; border-color: #7dd3fc;
-      transform: scale(1.05); box-shadow: 0 0 10px rgba(2, 132, 199, 0.5);
+      box-shadow: 0 0 8px rgba(2, 132, 199, 0.5);
     }
 
     /* 우측 사이드바: 실시간 수학 풀이 공책 */
@@ -352,36 +360,117 @@
       display: flex; flex-direction: column; height: 100%; overflow: hidden;
     }
     .notebook-header {
-      padding: 14px 18px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
-      font-weight: 900; font-size: 0.95rem; color: #334155;
+      padding: 12px 16px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
+      font-weight: 900; font-size: 0.9rem; color: #334155;
       display: flex; justify-content: space-between; align-items: center;
     }
     .notebook-body {
-      flex: 1; padding: 14px; overflow-y: auto;
+      flex: 1; padding: 12px; overflow-y: auto;
       background-image: linear-gradient(#f1f5f9 1px, transparent 1px);
-      background-size: 100% 32px;
-      display: flex; flex-direction: column; gap: 8px;
+      background-size: 100% 30px;
+      display: flex; flex-direction: column; gap: 7px;
     }
     .log-step {
-      background: rgba(255,255,255,0.9); border: 1px solid #e2e8f0;
-      border-left: 4px solid #3b82f6; border-radius: 8px; padding: 8px 12px;
+      background: rgba(255,255,255,0.92); border: 1px solid #e2e8f0;
+      border-left: 4px solid #3b82f6; border-radius: 8px; padding: 7px 10px;
       animation: fadeIn 0.25s ease;
     }
-    .log-action { font-size: 0.75rem; color: #64748b; font-weight: 700; margin-bottom: 2px; }
-    .log-eq { font-size: 1.05rem; font-weight: 900; color: #0f172a; }
+    .log-action { font-size: 0.72rem; color: #64748b; font-weight: 700; margin-bottom: 2px; }
+    .log-eq { font-size: 1rem; font-weight: 900; color: #0f172a; }
     .notebook-footer {
-      padding: 12px 16px; background: #f8fafc; border-top: 1px solid #e2e8f0;
-      font-size: 0.78rem; color: #64748b; line-height: 1.4;
+      padding: 10px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0;
+      font-size: 0.74rem; color: #64748b; line-height: 1.35;
     }
 
     /* 클리어 오버레이 배너 */
     .clear-floating-banner {
-      position: absolute; top: 82px; z-index: 25;
+      position: absolute; top: 75px; z-index: 25;
       background: rgba(236, 253, 245, 0.98); backdrop-filter: blur(8px);
-      border: 2px solid #10b981; border-radius: 18px; padding: 12px 24px;
-      display: flex; align-items: center; gap: 18px;
+      border: 2px solid #10b981; border-radius: 16px; padding: 10px 20px;
+      display: flex; align-items: center; gap: 14px; max-width: 94%;
       box-shadow: 0 12px 30px rgba(16, 185, 129, 0.28);
       animation: popBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* 모달 팝업 (문제 직접 만들기 & 모바일 노트) */
+    .modal-backdrop {
+      position: absolute; inset: 0; background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px); z-index: 50;
+      display: flex; justify-content: center; align-items: center; padding: 16px;
+    }
+    .modal-card {
+      background: white; border-radius: 20px; width: 100%; max-width: 420px;
+      padding: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      animation: popBounce 0.25s ease;
+    }
+    .modal-card h3 { margin: 0 0 12px 0; font-size: 1.1rem; color: #0f172a; }
+    .custom-input-row {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      background: #f1f5f9; padding: 12px; border-radius: 12px; margin-bottom: 12px;
+      font-weight: 900; font-size: 1.1rem; flex-wrap: wrap;
+    }
+    .custom-input-row input {
+      width: 48px; height: 36px; text-align: center; font-weight: 900; font-size: 1rem;
+      border: 2px solid #cbd5e1; border-radius: 8px;
+    }
+
+    /* ★ 스마트폰/태블릿 세로 모드 완벽 대응 */
+    @media (max-width: 900px) {
+      #root { padding: 0; }
+      .game-window {
+        border-radius: 0; max-height: none; height: 100%;
+      }
+      .header-bar { padding: 6px 10px; gap: 6px; }
+      .brand { font-size: 0.92rem; }
+      .stage-nav { order: 3; width: 100%; padding-top: 2px; }
+      .stage-pill { padding: 4px 9px; font-size: 0.72rem; }
+      .mobile-only-btn { display: flex; }
+
+      .main-workspace {
+        grid-template-columns: 1fr; /* 우측 공책 숨기고 1단 전체 화면 사용 */
+      }
+      .notebook-sidebar { display: none; }
+      .notebook-sidebar.mobile-open {
+        display: flex; position: absolute; inset: 0; z-index: 45;
+      }
+
+      .canvas-section { padding: 8px 10px; }
+      .canvas-hud {
+        flex-direction: column; align-items: stretch; gap: 6px;
+      }
+      .hud-right-group {
+        order: -1; width: 100%; justify-content: space-between;
+      }
+      .equation-hud {
+        font-size: 1.25rem; padding: 4px 14px; gap: 8px; flex: 1; justify-content: center;
+      }
+      .sign-badge { width: 28px; height: 28px; font-size: 1rem; }
+      .moves-hud { padding: 4px 10px; }
+      .moves-hud .count { font-size: 0.8rem; }
+      .moves-hud .target { font-size: 0.65rem; }
+
+      .goal-guide-card {
+        max-width: 100%; padding: 7px 10px; border-radius: 10px;
+      }
+      .goal-badge { font-size: 0.65rem; padding: 1px 6px; }
+      .goal-title { font-size: 0.78rem; }
+      .goal-sub { font-size: 0.68rem; }
+
+      .clear-floating-banner {
+        top: 52px; padding: 8px 12px; gap: 8px; flex-wrap: wrap; justify-content: center;
+      }
+
+      /* 하단 플로팅 독 모바일 최적화 (컴팩트 3줄 구성) */
+      .floating-dock {
+        padding: 7px 8px; gap: 5px; border-radius: 14px;
+      }
+      .dock-section {
+        border-right: none; padding: 2px 4px; justify-content: center;
+      }
+      .dock-label { font-size: 0.68rem; }
+      .sync-chip, .num-chip { font-size: 0.73rem; height: 25px; }
+      .num-chip { width: 25px; }
+      .dock-btn { padding: 6px 9px; font-size: 0.74rem; }
     }
 
     @keyframes itemDrop { 0% { transform: translateY(-25px) scale(0.5); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
@@ -389,103 +478,7 @@
     @keyframes poofAnim { 0% { transform: scale(0.4); opacity: 1; } 100% { transform: scale(1.5) translateY(-20px); opacity: 0; } }
     @keyframes popBounce { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     @keyframes fadeIn { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
-    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
- /* ★ 스마트폰 및 태블릿 세로 화면 대응 (반응형 미디어 쿼리) */
-    @media (max-width: 960px) {
-      body {
-        height: auto; min-height: 100vh; overflow-y: auto;
-        padding: 0; align-items: flex-start;
-      }
-      .game-window {
-        height: auto; max-height: none; min-height: 100vh;
-        border-radius: 0; box-shadow: none;
-      }
-
-      /* 1. 상단 바: 줄바꿈 및 가로 스크롤 허용 */
-      .header-bar {
-        height: auto; flex-wrap: wrap; gap: 8px; padding: 10px 12px;
-      }
-      .brand { font-size: 1rem; }
-      .stage-nav {
-        order: 3; width: 100%; overflow-x: auto; padding-bottom: 4px;
-        justify-content: flex-start; flex-wrap: nowrap;
-      }
-      .stage-pill { flex-shrink: 0; font-size: 0.75rem; padding: 5px 10px; }
-
-      /* 2. 좌/우 2단 분할을 상/하 1단으로 변경 (우측 공책이 아래로 내려감) */
-      .main-workspace {
-        display: flex; flex-direction: column; overflow: visible;
-      }
-      .canvas-section {
-        padding: 12px 10px; min-height: 540px;
-      }
-
-      /* 3. 상단 HUD 세로 정렬 */
-      .canvas-hud {
-        flex-direction: column; align-items: center; gap: 8px;
-      }
-      .goal-guide-card {
-        max-width: 100%; width: 100%; padding: 8px 12px;
-      }
-      .goal-title { font-size: 0.82rem; }
-      .equation-hud {
-        font-size: 1.35rem; padding: 6px 18px; order: -1; /* 수식을 맨 위로 */
-      }
-      .moves-hud {
-        width: 100%; display: flex; justify-content: space-between;
-        align-items: center; padding: 6px 12px;
-      }
-
-      /* 4. 거대한 양팔저울을 폰 화면 폭에 맞게 비율 축소 (Scale Down) */
-      .scale-stage-center {
-        min-height: 220px; width: 100%; overflow: hidden;
-      }
-      .scale-area {
-        transform: scale(0.56); /* 폰 화면에 쏙 들어오도록 축소 */
-        transform-origin: center center;
-        margin: -40px 0;
-      }
-
-      /* 빈 저울 나눠 담기 모드 모바일 대응 */
-      .mini-scales-container {
-        flex-wrap: wrap; gap: 8px;
-      }
-      .mini-scale-card {
-        width: 47%; padding: 6px;
-      }
-      .mini-scale-viewport {
-        width: 150px; height: 110px;
-      }
-      .mini-scale-inner {
-        transform: scale(0.28);
-      }
-      .split-control-bar {
-        flex-wrap: wrap; justify-content: center; width: 100%;
-      }
-
-      /* 5. 하단 컨트롤 독: 모바일 터치에 맞게 줄바꿈 */
-      .floating-dock {
-        width: 100%; padding: 10px; gap: 8px; border-radius: 16px;
-      }
-      .dock-section {
-        border-right: none; width: 100%; justify-content: center;
-        border-bottom: 1px solid #334155; padding-bottom: 6px;
-        flex-wrap: wrap;
-      }
-      .dock-section:last-child { border-bottom: none; padding-bottom: 0; }
-
-      /* 클리어 배너 모바일 크기 조정 */
-      .clear-floating-banner {
-        width: 94%; flex-wrap: wrap; justify-content: center;
-        text-align: center; padding: 10px 14px; top: 60px; gap: 10px;
-      }
-
-      /* 6. 우측 수학 공책은 화면 맨 아래에 깔끔하게 배치 */
-      .notebook-sidebar {
-        border-left: none; border-top: 2px solid #cbd5e1;
-        max-height: 260px;
-      }
-    }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
   </style>
 </head>
 <body>
@@ -576,11 +569,11 @@
 
     const STAGES = [
       { id: 0, name: "🌟 Stage 0: 등식의 성질", isTutorial: true },
-      { id: 1, name: "Stage 1: 덧셈 방정식" },
-      { id: 2, name: "Stage 2: 곱셈 방정식" },
-      { id: 3, name: "Stage 3: 2단계 방정식" },
-      { id: 4, name: "Stage 4: 양변에 x" },
-      { id: 5, name: "Stage 5: 음수 방정식" }
+      { id: 1, name: "Stage 1: 덧셈" },
+      { id: 2, name: "Stage 2: 곱셈" },
+      { id: 3, name: "Stage 3: 2단계" },
+      { id: 4, name: "Stage 4: 양변 x" },
+      { id: 5, name: "Stage 5: 음수" }
     ];
 
     const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -601,7 +594,12 @@
       return parts.length > 0 ? parts.join(" ") : "0";
     }
 
-    function ScaleView({ left, right, tiltAngle, isCleared, secretX, poofSide, tempBalloons = { left: 0, right: 0 }, onItemClick, stage, isGiftBox = false, showRoleTag = true }) {
+    // ★ 화면 폭에 맞춰 자동으로 정확한 비율과 크기를 잡아주는 ScaleView
+    function ScaleView({
+      left, right, tiltAngle, isCleared, secretX, poofSide,
+      tempBalloons = { left: 0, right: 0, leftX: 0, rightX: 0 },
+      onItemClick, stage, isGiftBox = false, showRoleTag = true, scaleFactor = 1
+    }) {
       const renderItems = (plate, side) => {
         const items = [];
         const hasXOnThisPlate = plate.x !== 0;
@@ -610,7 +608,7 @@
           if (isCleared && (stage > 0 || isGiftBox) && plate.x === 1 && plate.num === 0) {
             items.push(
               <div key={`${side}-x-open`} className="item box-x opened">
-                {isGiftBox ? `🎁 상자 = ${secretX}` : `📦 x = ${secretX}`}
+                {isGiftBox ? `🎁 = ${secretX}` : `📦 x = ${secretX}`}
               </div>
             );
           } else {
@@ -619,7 +617,6 @@
               <div
                 key={`${side}-x-${i}`}
                 className={`item ${isGiftBox ? 'box-gift' : (isPos ? 'box-x' : 'box-neg-x')}`}
-                title="클릭하여 옮기거나 덜어내기"
                 onClick={() => onItemClick && onItemClick(side, 'x', isPos ? -1 : 1)}
               >
                 {isGiftBox ? '🎁' : (isPos ? 'x' : '-x')}
@@ -633,7 +630,6 @@
             <div
               key={`${side}-n-${i}`}
               className={`item ${isPos ? 'weight-pos' : 'balloon-neg'} ${hasXOnThisPlate ? 'distractor' : ''}`}
-              title="클릭하여 옮기거나 덜어내기"
               onClick={() => onItemClick && onItemClick(side, 'num', isPos ? -1 : 1)}
             >
               {isPos ? '1' : '-1'}
@@ -641,7 +637,7 @@
           );
         }
 
-        // 양수 추를 없애기 위해 방금 매달린 임시 풍선 렌더링 (0.6초 뒤 펑 터지며 사라짐)
+        // 양수 추(+1)를 없애기 위해 날아온 임시 풍선(-1) 렌더링
         const extraBalloons = tempBalloons[side] || 0;
         for (let i = 0; i < extraBalloons; i++) {
           items.push(
@@ -651,39 +647,54 @@
           );
         }
 
+        // ★ 보완: 양수 상자(+x)를 없애기 위해 날아온 임시 마이너스 상자 풍선(-x) 렌더링
+        const extraXBalloons = tempBalloons[`${side}X`] || 0;
+        for (let i = 0; i < extraXBalloons; i++) {
+          items.push(
+            <div key={`${side}-temp-xb-${i}`} className="item box-neg-x" style={{ outline: '2px solid #fde047', zIndex: 15 }}>
+              -x
+            </div>
+          );
+        }
+
         return items;
       };
 
+      const baseW = 580;
+      const baseH = 305;
+
       return (
-        <div className="scale-area">
-          <div className="scale-beam" style={{ transform: `rotate(${tiltAngle}deg)` }}>
-            <div className="scale-pointer" />
-            <div className="scale-center-cap" />
+        <div className="scale-sizer" style={{ width: `${baseW * scaleFactor}px`, height: `${baseH * scaleFactor}px` }}>
+          <div className="scale-area" style={{ transform: `scale(${scaleFactor})` }}>
+            <div className="scale-beam" style={{ transform: `rotate(${tiltAngle}deg)` }}>
+              <div className="scale-pointer" />
+              <div className="scale-center-cap" />
 
-            <div className="plate-wrapper left" style={{ transform: `rotate(${-tiltAngle}deg)` }}>
-              {(poofSide === 'left' || poofSide === 'both') && <div className="poof-effect">💥 펑! (0 상쇄)</div>}
-              <div className="items-box">{renderItems(left, 'left')}</div>
-              <div className="plate" />
-              <div className="plate-pillar" />
-              {(stage > 0 || isGiftBox) && showRoleTag && (
-                <div className="plate-role-tag tag-x-goal">
-                  🎯 목표: 여기에 [{isGiftBox ? '🎁 상자' : '📦 x'}] 1개만 남기기
-                </div>
-              )}
-            </div>
+              <div className="plate-wrapper left" style={{ transform: `rotate(${-tiltAngle}deg)` }}>
+                {(poofSide === 'left' || poofSide === 'both') && <div className="poof-effect">💥 펑! (0 상쇄)</div>}
+                <div className="items-box">{renderItems(left, 'left')}</div>
+                <div className="plate" />
+                <div className="plate-pillar" />
+                {(stage > 0 || isGiftBox) && showRoleTag && (
+                  <div className="plate-role-tag tag-x-goal">
+                    🎯 목표: [{isGiftBox ? '🎁 상자' : '📦 x'}] 1개만 남기기
+                  </div>
+                )}
+              </div>
 
-            <div className="plate-wrapper right" style={{ transform: `rotate(${-tiltAngle}deg)` }}>
-              {(poofSide === 'right' || poofSide === 'both') && <div className="poof-effect">💥 펑! (0 상쇄)</div>}
-              <div className="items-box">{renderItems(right, 'right')}</div>
-              <div className="plate" />
-              <div className="plate-pillar" />
-              {(stage > 0 || isGiftBox) && showRoleTag && (
-                <div className="plate-role-tag tag-num-goal">🔢 목표: 여기에 숫자 추만 남기기</div>
-              )}
+              <div className="plate-wrapper right" style={{ transform: `rotate(${-tiltAngle}deg)` }}>
+                {(poofSide === 'right' || poofSide === 'both') && <div className="poof-effect">💥 펑! (0 상쇄)</div>}
+                <div className="items-box">{renderItems(right, 'right')}</div>
+                <div className="plate" />
+                <div className="plate-pillar" />
+                {(stage > 0 || isGiftBox) && showRoleTag && (
+                  <div className="plate-role-tag tag-num-goal">🔢 목표: 숫자 추만 남기기</div>
+                )}
+              </div>
             </div>
+            <div className="scale-stand" />
+            <div className="scale-base" />
           </div>
-          <div className="scale-stand" />
-          <div className="scale-base" />
         </div>
       );
     }
@@ -697,7 +708,6 @@
       const [left, setLeft] = useState({ x: 0, num: 3 });
       const [right, setRight] = useState({ x: 0, num: 3 });
       
-      // 디폴트 선택값 없음 (초기 null)
       const [targetSide, setTargetSide] = useState(null);
       const [stepSize, setStepSize] = useState(null);
 
@@ -705,17 +715,44 @@
       const [optimalMoves, setOptimalMoves] = useState(1);
       const [lastActionKey, setLastActionKey] = useState(null);
       
-      const [totalStars, setTotalStars] = useState(0);
-      const [streak, setStreak] = useState(0);
+      // ★ 로컬 스토리지 연동으로 새로고침해도 별점과 콤보 유지
+      const [totalStars, setTotalStars] = useState(() => Number(localStorage.getItem('math_scale_stars') || 0));
+      const [streak, setStreak] = useState(() => Number(localStorage.getItem('math_scale_streak') || 0));
       const [bestStarsThisProb, setBestStarsThisProb] = useState(0);
       const [muted, setMuted] = useState(false);
 
       const [msg, setMsg] = useState("");
       const [poofSide, setPoofSide] = useState(null);
-      const [tempBalloons, setTempBalloons] = useState({ left: 0, right: 0 });
+      const [tempBalloons, setTempBalloons] = useState({ left: 0, right: 0, leftX: 0, rightX: 0 });
       const [isAnimating, setIsAnimating] = useState(false);
       const [history, setHistory] = useState([]);
       const [multiScales, setMultiScales] = useState(null);
+
+      // 모바일 화면 크기 측정 및 모달 상태
+      const [winSize, setWinSize] = useState({ w: window.innerWidth, h: window.innerHeight });
+      const [showMobileNote, setShowMobileNote] = useState(false);
+      const [showCustomModal, setShowCustomModal] = useState(false);
+      const [customForm, setCustomForm] = useState({ lx: 2, lnum: 1, rx: 0, xval: 3 });
+
+      useEffect(() => {
+        const onResize = () => setWinSize({ w: window.innerWidth, h: window.innerHeight });
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+      }, []);
+
+      useEffect(() => {
+        localStorage.setItem('math_scale_stars', totalStars);
+        localStorage.setItem('math_scale_streak', streak);
+      }, [totalStars, streak]);
+
+      // ★ 기기 화면 폭과 높이에 맞춰 저울의 배율(scaleFactor)을 정밀 자동 계산
+      const isMobile = winSize.w <= 900;
+      const mainScaleFactor = isMobile
+        ? Math.min(0.85, Math.max(0.48, (winSize.w - 28) / 580, (winSize.h - 380) / 310))
+        : Math.min(1.06, Math.max(0.75, (winSize.w - 360) / 600));
+      const miniScaleFactor = isMobile
+        ? Math.min(0.38, Math.max(0.24, (winSize.w * 0.44) / 580))
+        : 0.41;
 
       const isGiftBoxMode = stage === 0 && TUTORIAL_STEPS[tutIdx]?.isGiftBox;
 
@@ -742,7 +779,7 @@
         resetSelections();
         setOptimalMoves(1); setMoves(0); setLastActionKey(null);
         setMultiScales(null); setBestStarsThisProb(0); setMsg("");
-        setTempBalloons({ left: 0, right: 0 }); setIsAnimating(false);
+        setTempBalloons({ left: 0, right: 0, leftX: 0, rightX: 0 }); setIsAnimating(false);
         const lW = t.initLeft.x * (t.secretVal || 1) + t.initLeft.num;
         const rW = t.initRight.x * (t.secretVal || 1) + t.initRight.num;
         const signStr = lW === rW ? '=' : '>';
@@ -753,27 +790,32 @@
         if (currentStage === 0) {
           loadTutorialStep(0); setTutIdx(0); return;
         }
-        const xVal = rand(1, 4);
-        let l = { x: 0, num: 0 }, r = { x: 0, num: 0 };
+        let xVal, l, r;
+        // 직전 문제와 완전히 똑같은 식이 연속으로 나오지 않도록 중복 방지 루프
+        for (let attempt = 0; attempt < 5; attempt++) {
+          xVal = rand(1, 4);
+          l = { x: 0, num: 0 }; r = { x: 0, num: 0 };
 
-        if (currentStage === 1) {
-          const a = rand(1, 5);
-          l = { x: 1, num: a }; r = { x: 0, num: xVal + a };
-        } else if (currentStage === 2) {
-          const a = rand(2, 3);
-          l = { x: a, num: 0 }; r = { x: 0, num: a * xVal };
-        } else if (currentStage === 3) {
-          const a = rand(2, 3), b = rand(1, 4);
-          l = { x: a, num: b }; r = { x: 0, num: a * xVal + b };
-        } else if (currentStage === 4) {
-          const c = rand(1, 2), a = c + rand(1, 2), b = rand(1, 4);
-          const d = (a - c) * xVal + b;
-          l = { x: a, num: b }; r = { x: c, num: d };
-        } else if (currentStage === 5) {
-          const a = rand(1, 3), b = rand(-4, -1);
-          const c = a > 1 ? rand(0, a - 1) : 0;
-          const d = (a - c) * xVal + b;
-          l = { x: a, num: b }; r = { x: c, num: d };
+          if (currentStage === 1) {
+            const a = rand(1, 5);
+            l = { x: 1, num: a }; r = { x: 0, num: xVal + a };
+          } else if (currentStage === 2) {
+            const a = rand(2, 3);
+            l = { x: a, num: 0 }; r = { x: 0, num: a * xVal };
+          } else if (currentStage === 3) {
+            const a = rand(2, 3), b = rand(1, 4);
+            l = { x: a, num: b }; r = { x: 0, num: a * xVal + b };
+          } else if (currentStage === 4) {
+            const c = rand(1, 2), a = c + rand(1, 2), b = rand(1, 4);
+            const d = (a - c) * xVal + b;
+            l = { x: a, num: b }; r = { x: c, num: d };
+          } else if (currentStage === 5) {
+            const a = rand(1, 3), b = rand(-4, -1);
+            const c = a > 1 ? rand(0, a - 1) : 0;
+            const d = (a - c) * xVal + b;
+            l = { x: a, num: b }; r = { x: c, num: d };
+          }
+          if (!initialState || l.x !== initialState.left.x || l.num !== initialState.left.num || r.num !== initialState.right.num) break;
         }
 
         setSecretX(xVal);
@@ -783,8 +825,30 @@
         resetSelections();
         setMoves(0); setLastActionKey(null);
         setMultiScales(null); setBestStarsThisProb(0); setMsg("");
-        setTempBalloons({ left: 0, right: 0 }); setIsAnimating(false);
+        setTempBalloons({ left: 0, right: 0, leftX: 0, rightX: 0 }); setIsAnimating(false);
         setHistory([{ action: "처음 주어진 방정식", eq: `${formatSide(l)} = ${formatSide(r)}` }]);
+      };
+
+      // 선생님/학생 직접 문제 만들기 적용 함수
+      const applyCustomProblem = () => {
+        const xVal = Math.max(1, Math.min(6, Number(customForm.xval) || 2));
+        const lx = Math.max(1, Math.min(4, Number(customForm.lx) || 1));
+        const lnum = Math.max(-5, Math.min(6, Number(customForm.lnum) || 0));
+        const rx = Math.max(0, Math.min(lx - 1, Number(customForm.rx) || 0));
+        const rnum = (lx - rx) * xVal + lnum;
+
+        const l = { x: lx, num: lnum };
+        const r = { x: rx, num: rnum };
+        if (stage === 0) setStage(3);
+        setSecretX(xVal);
+        setLeft(l); setRight(r);
+        setInitialState({ left: { ...l }, right: { ...r } });
+        setOptimalMoves(getOptimal(l, r));
+        resetSelections();
+        setMoves(0); setLastActionKey(null);
+        setMultiScales(null); setBestStarsThisProb(0); setMsg("");
+        setHistory([{ action: "✏️ 직접 만든 방정식", eq: `${formatSide(l)} = ${formatSide(r)}` }]);
+        setShowCustomModal(false);
       };
 
       useEffect(() => { generateProblem(stage); }, [stage]);
@@ -837,7 +901,7 @@
         if (!multiScales) {
           if (leftWeight !== rightWeight) {
             SoundFX.error();
-            setMsg("⚠️ 저울이 수평(=)일 때만 빈 저울을 가져와 나누어 담을 수 있어요! ([🔄 리셋]으로 수평을 맞춘 뒤 시도해 보세요)");
+            setMsg("⚠️ 저울이 수평(=)일 때만 빈 저울을 가져와 나누어 담을 수 있어요! ([🔄 리셋]으로 수평을 맞춰보세요)");
             return;
           }
           SoundFX.divideMagic();
@@ -936,8 +1000,8 @@
           }
           return {
             badge: `⚖️ 빈 저울에 직접 나누어 담기 (현재 저울 ${n}대)`,
-            title: `1번 저울의 상자와 추를 직접 마우스로 클릭해서 ${n}대의 저울이 모두 똑같아지도록 옮겨 담아보세요!`,
-            sub: "저울 대수가 더 필요하면 [➕ 빈 저울 1대 더 가져오기]를 누르세요."
+            title: `1번 저울의 상자와 추를 터치(클릭)해서 ${n}대의 저울이 모두 똑같아지도록 옮겨 담아보세요!`,
+            sub: "저울 대수가 더 필요하면 [➕ 빈 저울 더 가져오기]를 누르세요."
           };
         }
         if (stage === 0) {
@@ -965,23 +1029,24 @@
             sub: "하단에서 [① 대상]과 [② 개수]를 직접 선택한 뒤 x 상자를 덜어내 보세요."
           };
         }
-        if (left.num !== 0) {
+        const xPlate = left.x !== 0 ? left : right;
+        if (xPlate.num !== 0) {
           return {
             badge: "🎯 현재 목표: x 상자 옆의 방해꾼 없애기",
-            title: "왼쪽 접시에 [📦 x 상자]만 혼자 남도록 옆에 있는 숫자 추(또는 풍선)를 없애보세요!",
+            title: "[📦 x 상자]만 혼자 남도록 같은 접시에 있는 숫자 추(또는 풍선)를 없애보세요!",
             sub: "어느 접시(대상)에서 몇 개(개수)를 더하거나 풍선(-)을 달아야 수평을 유지하며 없앨 수 있을까요?"
           };
         }
-        if (left.x > 1) {
+        if (Math.abs(xPlate.x) > 1) {
           return {
             badge: "🎯 마지막 목표: x 상자 1개의 무게 찾기",
-            title: `왼쪽 접시에 x 상자가 여러 개 있습니다. 상자 1개의 무게를 알려면 저울이 총 몇 대 필요할까요?`,
+            title: `접시에 x 상자가 여러 개 있습니다. 상자 1개의 무게를 알려면 저울이 총 몇 대 필요할까요?`,
             sub: "하단의 [⚖️ 빈 저울 가져오기]를 눌러 직접 나누어 담아보세요!"
           };
         }
         return {
           badge: "🎉 목표 달성!",
-          title: `왼쪽 접시에 x 상자 1개만 남았습니다! x = ${secretX}`,
+          title: `접시에 x 상자 1개만 남았습니다! x = ${secretX}`,
           sub: "양변에 똑같은 조작을 하여 미지수 x의 값을 구하는 것이 방정식을 푸는 것입니다."
         };
       };
@@ -1013,7 +1078,6 @@
           return;
         }
 
-        // 튜토리얼 4단계: 왼쪽 접시에는 숫자 추가 없으므로 좌변/양변 빼기는 막고, 우변만 빼는 것은 허용!
         if (stage === 0 && tutIdx === 3 && type === 'num' && dir < 0) {
           if ((sMode === 'left' || sMode === 'both') && left.num < actualStep) {
             SoundFX.error();
@@ -1045,26 +1109,34 @@
         const nRW = nextR.x * secretX + nextR.num;
         const signStr = nLW === nRW ? '=' : (nLW > nRW ? '>' : '<');
 
-        // ★ 양수 추(+1)가 있는 곳에 음수 풍선(-1)을 달아서 빼는 경우:
-        // 풍선이 먼저 0.6초간 매달렸다가 추와 함께 '펑!' 사라지는 2단계 애니메이션 연출
-        const isAddingBalloonToPosWeight = 
-          type === 'num' && dir < 0 && 
-          (((sMode === 'left' || sMode === 'both') && left.num > 0) || 
-           ((sMode === 'right' || sMode === 'both') && right.num > 0));
+        // ★ 양수 추(+1) 또는 양수 상자(+x)에 마이너스 풍선을 달아 빼는 경우: 0.6초간 풍선 매달림 후 펑!
+        const isAddingBalloonToPosItem = 
+          dir < 0 && 
+          (((sMode === 'left' || sMode === 'both') && left[type] > 0) || 
+           ((sMode === 'right' || sMode === 'both') && right[type] > 0));
 
         resetSelections();
 
-        if (isAddingBalloonToPosWeight) {
+        if (isAddingBalloonToPosItem) {
           setIsAnimating(true);
           SoundFX.balloonFloat();
-          setTempBalloons({
-            left: (sMode === 'left' || sMode === 'both') ? actualStep : 0,
-            right: (sMode === 'right' || sMode === 'both') ? actualStep : 0
-          });
+          if (type === 'num') {
+            setTempBalloons({
+              left: (sMode === 'left' || sMode === 'both') ? actualStep : 0,
+              right: (sMode === 'right' || sMode === 'both') ? actualStep : 0,
+              leftX: 0, rightX: 0
+            });
+          } else {
+            setTempBalloons({
+              left: 0, right: 0,
+              leftX: (sMode === 'left' || sMode === 'both') ? actualStep : 0,
+              rightX: (sMode === 'right' || sMode === 'both') ? actualStep : 0
+            });
+          }
 
           setTimeout(() => {
             SoundFX.zeroPairPoof();
-            setTempBalloons({ left: 0, right: 0 });
+            setTempBalloons({ left: 0, right: 0, leftX: 0, rightX: 0 });
             setPoofSide(sMode);
             setTimeout(() => setPoofSide(null), 550);
 
@@ -1081,7 +1153,6 @@
         }
       };
 
-      // 선물상자/x상자는 클릭으로 그냥 빼지 못하게 막고, 숫자 추는 클릭해서 빼기 허용
       const handleItemDirectClick = (clickedSide, type, dir) => {
         if (type === 'x' && stage < 4) {
           SoundFX.error();
@@ -1098,7 +1169,7 @@
           setLeft({ ...initialState.left }); setRight({ ...initialState.right });
           resetSelections();
           setMoves(0); setLastActionKey(null); setMultiScales(null); setMsg("");
-          setTempBalloons({ left: 0, right: 0 }); setIsAnimating(false);
+          setTempBalloons({ left: 0, right: 0, leftX: 0, rightX: 0 }); setIsAnimating(false);
           setHistory([{ action: "처음 주어진 방정식", eq: `${formatSide(initialState.left)} = ${formatSide(initialState.right)}` }]);
         }
       };
@@ -1125,7 +1196,7 @@
         <div className="game-window">
           {/* 1. 상단 바 */}
           <div className="header-bar">
-            <div className="brand">⚖️ 양팔저울 방정식 마스터</div>
+            <div className="brand">⚖️ 양팔저울 방정식</div>
             <div className="stage-nav">
               {STAGES.map(s => (
                 <button
@@ -1139,7 +1210,13 @@
             </div>
             <div className="header-stats">
               <div className="stat-chip"><span style={{color:'#facc15'}}>★</span> {totalStars}</div>
-              <div className="stat-chip">🔥 {streak}연속</div>
+              <div className="stat-chip">🔥 {streak}</div>
+              <button className="icon-btn" onClick={() => setShowCustomModal(true)} title="직접 방정식 문제 만들기">
+                ✏️ 문제 만들기
+              </button>
+              <button className="icon-btn mobile-only-btn" onClick={() => setShowMobileNote(true)}>
+                📓 노트({history.length - 1})
+              </button>
               <button className="icon-btn" onClick={() => { SoundFX.muted = !muted; setMuted(!muted); }}>
                 {muted ? '🔇' : '🔊'}
               </button>
@@ -1158,21 +1235,23 @@
                   <div className="goal-sub">💡 {guide.sub}</div>
                 </div>
 
-                <div className="equation-hud">
-                  <span>{formatSide(left, isGiftBoxMode)}</span>
-                  <span className={`sign-badge ${leftWeight === rightWeight ? 'equal' : 'unequal'}`}>
-                    {leftWeight === rightWeight ? '=' : (leftWeight > rightWeight ? '>' : '<')}
-                  </span>
-                  <span>{formatSide(right, isGiftBoxMode)}</span>
-                </div>
+                <div className="hud-right-group">
+                  <div className="equation-hud">
+                    <span>{formatSide(left, isGiftBoxMode)}</span>
+                    <span className={`sign-badge ${leftWeight === rightWeight ? 'equal' : 'unequal'}`}>
+                      {leftWeight === rightWeight ? '=' : (leftWeight > rightWeight ? '>' : '<')}
+                    </span>
+                    <span>{formatSide(right, isGiftBoxMode)}</span>
+                  </div>
 
-                <div className="moves-hud">
-                  <div className="count">이동: {moves}회</div>
-                  <div className="target">★3 목표: {optimalMoves}회 이내</div>
-                  <div style={{letterSpacing:'2px', fontSize:'0.95rem'}}>
-                    <span style={{color: currentStars >= 1 ? '#f59e0b' : '#cbd5e1'}}>★</span>
-                    <span style={{color: currentStars >= 2 ? '#f59e0b' : '#cbd5e1'}}>★</span>
-                    <span style={{color: currentStars >= 3 ? '#f59e0b' : '#cbd5e1'}}>★</span>
+                  <div className="moves-hud">
+                    <div className="count">이동: {moves}회</div>
+                    <div className="target">★3 목표: {optimalMoves}회</div>
+                    <div style={{letterSpacing:'2px', fontSize:'0.9rem'}}>
+                      <span style={{color: currentStars >= 1 ? '#f59e0b' : '#cbd5e1'}}>★</span>
+                      <span style={{color: currentStars >= 2 ? '#f59e0b' : '#cbd5e1'}}>★</span>
+                      <span style={{color: currentStars >= 3 ? '#f59e0b' : '#cbd5e1'}}>★</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1180,13 +1259,13 @@
               {/* 클리어 시 상단 팝업 */}
               {isCleared && (
                 <div className="clear-floating-banner">
-                  <div style={{fontSize:'1.8rem'}}>{currentStars === 3 ? "⭐⭐⭐" : currentStars === 2 ? "⭐⭐☆" : "⭐☆☆"}</div>
-                  <div style={{maxWidth: '430px'}}>
-                    <div style={{fontWeight:900, color:'#065f46', fontSize:'0.98rem'}}>
+                  <div style={{fontSize:'1.6rem'}}>{currentStars === 3 ? "⭐⭐⭐" : currentStars === 2 ? "⭐⭐☆" : "⭐☆☆"}</div>
+                  <div style={{maxWidth: '420px'}}>
+                    <div style={{fontWeight:900, color:'#065f46', fontSize:'0.92rem'}}>
                       {stage === 0 ? TUTORIAL_STEPS[tutIdx].clearComment : `정답입니다! 미지수 x의 무게는 ${secretX} 입니다! 🎉`}
                     </div>
                     {stage > 0 && (
-                      <div style={{fontSize:'0.8rem', color:'#047857', marginTop:'2px'}}>
+                      <div style={{fontSize:'0.76rem', color:'#047857', marginTop:'2px'}}>
                         이동 기록: {moves}회 (목표 {optimalMoves}회)
                       </div>
                     )}
@@ -1194,15 +1273,15 @@
                   {stage > 0 && currentStars < 3 && (
                     <button className="dock-btn d-xpos" onClick={handleReset}>🔄 별3 재도전</button>
                   )}
-                  <button className="dock-btn pulse-highlight" style={{background:'#16a34a', color:'white', padding:'9px 16px'}} onClick={handleNextButton}>
-                    {stage === 0 && tutIdx < 3 ? `다음 미션 (${tutIdx + 2}/4) ▶` : (stage === 0 ? "🚀 Stage 1 방정식 출발! ▶" : "다음 문제 ▶")}
+                  <button className="dock-btn pulse-highlight" style={{background:'#16a34a', color:'white', padding:'8px 14px'}} onClick={handleNextButton}>
+                    {stage === 0 && tutIdx < 3 ? `다음 미션 (${tutIdx + 2}/4) ▶` : (stage === 0 ? "🚀 Stage 1 출발! ▶" : "다음 문제 ▶")}
                   </button>
                 </div>
               )}
 
               {/* 에러/안내 메시지 */}
               {msg && !isCleared && (
-                <div style={{position:'absolute', top:'98px', maxWidth:'680px', textAlign:'center', background:'#fef2f2', border:'2px solid #f87171', color:'#dc2626', padding:'8px 18px', borderRadius:'20px', fontWeight:800, fontSize:'0.85rem', zIndex:20, boxShadow:'0 4px 12px rgba(0,0,0,0.1)'}}>
+                <div style={{position:'absolute', top: isMobile ? '115px' : '92px', maxWidth:'92%', textAlign:'center', background:'#fef2f2', border:'2px solid #f87171', color:'#dc2626', padding:'7px 14px', borderRadius:'16px', fontWeight:800, fontSize:'0.8rem', zIndex:20, boxShadow:'0 4px 12px rgba(0,0,0,0.12)'}}>
                   {msg}
                 </div>
               )}
@@ -1216,6 +1295,7 @@
                     poofSide={poofSide} tempBalloons={tempBalloons}
                     onItemClick={handleItemDirectClick}
                     stage={stage} isGiftBox={isGiftBoxMode}
+                    scaleFactor={mainScaleFactor}
                   />
                 ) : (
                   <div className="multi-scales-workspace">
@@ -1229,20 +1309,17 @@
                         return (
                           <div key={idx} className={`mini-scale-card ${idx === 0 ? 'source-card' : ''} ${splitReady ? 'equal-ready' : ''}`}>
                             <div className="mini-badge">
-                              {idx === 0 ? "📦 1번 저울 (아이템 클릭 ➔ 다른 저울로 이동)" : `⚖️ ${idx + 1}번 저울 (아이템 클릭 ➔ 1번으로 복귀)`}
+                              {idx === 0 ? "📦 1번 저울 (터치➔이동)" : `⚖️ ${idx + 1}번 저울 (터치➔복귀)`}
                             </div>
-                            <div style={{ fontWeight: 900, fontSize: '0.95rem', marginTop: '4px', color: sLW === sRW ? '#059669' : '#dc2626' }}>
+                            <div style={{ fontWeight: 900, fontSize: '0.88rem', marginTop: '3px', color: sLW === sRW ? '#059669' : '#dc2626' }}>
                               {formatSide(s.left, isGiftBoxMode)} {sSign} {formatSide(s.right, isGiftBoxMode)}
                             </div>
-                            <div className="mini-scale-viewport">
-                              <div className="mini-scale-inner">
-                                <ScaleView
-                                  left={s.left} right={s.right} tiltAngle={sTilt}
-                                  stage={stage} isGiftBox={isGiftBoxMode} showRoleTag={false}
-                                  onItemClick={(side, type) => handleMultiScaleItemClick(idx, side, type)}
-                                />
-                              </div>
-                            </div>
+                            <ScaleView
+                              left={s.left} right={s.right} tiltAngle={sTilt}
+                              stage={stage} isGiftBox={isGiftBoxMode} showRoleTag={false}
+                              scaleFactor={miniScaleFactor}
+                              onItemClick={(side, type) => handleMultiScaleItemClick(idx, side, type)}
+                            />
                           </div>
                         );
                       })}
@@ -1250,15 +1327,15 @@
 
                     <div className="split-control-bar">
                       <button className="dock-btn d-div" disabled={multiScales.length >= 4} onClick={handleAddEmptyScale}>
-                        ➕ 빈 저울 1대 더 가져오기 (현재 {multiScales.length}대)
+                        ➕ 빈 저울 더 가져오기 ({multiScales.length}대)
                       </button>
                       {splitReady && (
-                        <button className="dock-btn d-green pulse-highlight" style={{padding:'9px 18px', fontSize:'0.9rem'}} onClick={confirmEqualSplit}>
+                        <button className="dock-btn d-green pulse-highlight" onClick={confirmEqualSplit}>
                           ✨ 똑같이 나눴어요! (저울 1대만 남기기)
                         </button>
                       )}
                       <button className="dock-btn d-util" onClick={cancelSplitMode}>
-                        ✖ 나누기 취소 (다시 합치기)
+                        ✖ 나누기 취소
                       </button>
                     </div>
                   </div>
@@ -1279,7 +1356,7 @@
                   <button
                     className={`num-chip ${targetSide === 'left' ? 'active' : ''}`}
                     disabled={!!multiScales || isCleared || isAnimating}
-                    style={{width:'auto', padding:'0 8px'}}
+                    style={{width:'auto', padding:'0 7px'}}
                     onClick={() => { SoundFX.selectPop(); setTargetSide('left'); setMsg(""); }}
                   >
                     좌변만
@@ -1287,7 +1364,7 @@
                   <button
                     className={`num-chip ${targetSide === 'right' ? 'active' : ''}`}
                     disabled={!!multiScales || isCleared || isAnimating}
-                    style={{width:'auto', padding:'0 8px'}}
+                    style={{width:'auto', padding:'0 7px'}}
                     onClick={() => { SoundFX.selectPop(); setTargetSide('right'); setMsg(""); }}
                   >
                     우변만
@@ -1296,7 +1373,7 @@
 
                 <div className={`dock-section ${!stepSize && !multiScales && !isCleared ? 'needs-select' : ''}`}>
                   <span className="dock-label">② 개수:</span>
-                  {[1, 2, 3, 4, 5].map(n => (
+                  {[1, 2, 3, 4, 5, 6].map(n => (
                     <button
                       key={n}
                       className={`num-chip ${stepSize === n ? 'active' : ''}`}
@@ -1326,7 +1403,7 @@
                   </button>
                 </div>
 
-                {stage >= 4 && (
+                {(stage >= 4 || right.x !== 0) && (
                   <div className="dock-section">
                     <button
                       className={`dock-btn d-xpos ${!isActionReady ? 'locked-action' : ''}`}
@@ -1345,33 +1422,40 @@
                   </div>
                 )}
 
-                {(stage >= 2 || (stage === 0 && tutIdx === 3)) && (
+                {(stage >= 2 || left.x > 1 || (stage === 0 && tutIdx === 3)) && (
                   <div className="dock-section">
                     <button
                       className="dock-btn d-div"
                       disabled={isCleared || isAnimating || (multiScales && multiScales.length >= 4)}
                       onClick={handleAddEmptyScale}
                     >
-                      ⚖️ 빈 저울 가져오기 (+1대)
+                      ⚖️ 빈 저울 가져오기
                     </button>
                   </div>
                 )}
 
                 <div className="dock-section">
-                  <button className="dock-btn d-util" disabled={isAnimating} onClick={handleReset} title="처음 상태로">🔄 리셋</button>
+                  <button className="dock-btn d-util" disabled={isAnimating} onClick={handleReset}>🔄 리셋</button>
                   {stage > 0 && (
-                    <button className="dock-btn d-util" disabled={isAnimating} onClick={() => generateProblem(stage)} title="다른 문제">🎲 새 문제</button>
+                    <button className="dock-btn d-util" disabled={isAnimating} onClick={() => generateProblem(stage)}>🎲 새 문제</button>
                   )}
                 </div>
               </div>
 
             </div>
 
-            {/* 우측 사이드바: 실시간 수학 풀이 공책 */}
-            <div className="notebook-sidebar">
+            {/* 우측 사이드바: 실시간 수학 풀이 공책 (모바일에서는 버튼 클릭 시 오버레이로 열림) */}
+            <div className={`notebook-sidebar ${showMobileNote ? 'mobile-open' : ''}`}>
               <div className="notebook-header">
                 <span>📓 실시간 풀이 노트</span>
-                <span style={{fontSize:'0.75rem', color:'#64748b'}}>{history.length - 1}단계 진행</span>
+                <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                  <span style={{fontSize:'0.75rem', color:'#64748b'}}>{history.length - 1}단계</span>
+                  {isMobile && (
+                    <button className="dock-btn d-util" style={{padding:'4px 10px'}} onClick={() => setShowMobileNote(false)}>
+                      ✖ 닫기
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="notebook-body">
                 {history.map((item, idx) => (
@@ -1395,6 +1479,35 @@
             </div>
 
           </div>
+
+          {/* ✏️ 직접 문제 만들기 모달 */}
+          {showCustomModal && (
+            <div className="modal-backdrop" onClick={() => setShowCustomModal(false)}>
+              <div className="modal-card" onClick={e => e.stopPropagation()}>
+                <h3>✏️ 내 방정식 문제 직접 만들기</h3>
+                <p style={{fontSize:'0.8rem', color:'#64748b', margin:'0 0 12px 0'}}>
+                  좌변의 x 계수와 상수항, 우변의 x 계수, 그리고 정답(x)을 입력하면 우변의 숫자가 자동으로 맞춰집니다!
+                </p>
+                <div className="custom-input-row">
+                  <input type="number" min="1" max="4" value={customForm.lx} onChange={e => setCustomForm({...customForm, lx: e.target.value})} />
+                  <span>x + (</span>
+                  <input type="number" min="-5" max="6" value={customForm.lnum} onChange={e => setCustomForm({...customForm, lnum: e.target.value})} />
+                  <span>) = </span>
+                  <input type="number" min="0" max="3" value={customForm.rx} onChange={e => setCustomForm({...customForm, rx: e.target.value})} />
+                  <span>x + <b>?</b></span>
+                </div>
+                <div className="custom-input-row" style={{background:'#fef3c7'}}>
+                  <span>숨겨진 정답 x = </span>
+                  <input type="number" min="1" max="6" value={customForm.xval} onChange={e => setCustomForm({...customForm, xval: e.target.value})} />
+                </div>
+                <div style={{display:'flex', justifyContent:'flex-end', gap:'8px', marginTop:'14px'}}>
+                  <button className="dock-btn d-util" onClick={() => setShowCustomModal(false)}>취소</button>
+                  <button className="dock-btn d-pos" onClick={applyCustomProblem}>⚖️ 이 문제로 저울 세팅하기</button>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       );
     }
